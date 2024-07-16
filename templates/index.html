@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Movie Recommendation System</h1>
+        <form action="/recommend" method="post">
+            <label for="movie">Enter a movie name:</label>
+            <input type="text" id="movie" name="movie" onkeyup="fetchSuggestions()" required>
+            <div id="suggestions" class="dropdown-content"></div>
+            <button type="submit">Get Recommendations</button>
+        </form>
+        {% if recommendations %}
+            <h2>Recommendations for "{{ movie }}":</h2>
+            <ul>
+                {% for rec in recommendations %}
+                    <li>{{ rec }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <script>
+        function fetchSuggestions() {
+            var input = document.getElementById('movie').value;
+            if (input.length < 2) {
+                document.getElementById('suggestions').innerHTML = '';
+                return;
+            }
+            fetch('/suggestions?q=' + input)
+                .then(response => response.json())
+                .then(data => {
+                    var suggestionsBox = document.getElementById('suggestions');
+                    suggestionsBox.innerHTML = '';
+                    data.forEach(item => {
+                        var div = document.createElement('div');
+                        div.innerHTML = item;
+                        div.onclick = function() {
+                            document.getElementById('movie').value = this.innerHTML;
+                            suggestionsBox.innerHTML = '';
+                        };
+                        suggestionsBox.appendChild(div);
+                    });
+                });
+        }
+    </script>
+</body>
+</html>
