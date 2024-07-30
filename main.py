@@ -1,8 +1,9 @@
 import logging
 import pickle
-
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
+from imdb import IMDb
+from functools import lru_cache
 
 app = Flask(__name__)
 
@@ -18,21 +19,47 @@ with open('top_k_cosine_similarities.pkl', 'rb') as sim_file:
 
 # Load the dataset
 data = pd.read_csv('main_data.csv')
+movie_titles = data['movie_title'].str.lower().tolist()
+
+# Initialize IMDbPY
+ia = IMDb()
+
+# Cache for cover URLs to avoid repeated lookups
+cover_url_cache = {}
+
+@lru_cache(maxsize=1000)
+def get_cover_url(movie_title):
+    if movie_title in cover_url_cache:
+        return cover_url_cache[movie_title]
+
+    search_results = ia.search_movie(movie_title)
+    if search_results:
+        movie = search_results[0]
+        ia.update(movie)
+        cover_url = movie.get('cover url', '')
+        cover_url_cache[movie_title] = cover_url
+        return cover_url
+    return ''
 
 def rcmd(m):
     m = m.lower()
-    if m not in data['movie_title'].str.lower().unique():
-        return ['Sorry! try another movie name']
+    if m not in movie_titles:
+        return [{'title': 'Sorry! try another movie name', 'cover_url': ''}]
     else:
-        i = data[data['movie_title'].str.lower() == m].index[0]
-        # Get the top-k similar movies
+        i = movie_titles.index(m)
         similar_movies = next((item for item in top_k_similarities if item[0] == i), None)
         if similar_movies:
             top_k_indices = similar_movies[1]
-            l = [data['movie_title'][index] for index in top_k_indices]
-            return l
+            recommendations = [
+                {
+                    'title': data['movie_title'][index],
+                    'cover_url': get_cover_url(data['movie_title'][index])
+                }
+                for index in top_k_indices
+            ]
+            return recommendations
         else:
-            return ['No recommendations found']
+            return [{'title': 'No recommendations found', 'cover_url': ''}]
 
 @app.route('/')
 def home():
@@ -41,15 +68,14 @@ def home():
 @app.route('/recommend', methods=['POST'])
 def recommend():
     movie = request.form['movie']
-    # Log the searched movie
     app.logger.info(f"User searched for: {movie}")
     recommendations = rcmd(movie)
     return render_template('index.html', movie=movie, recommendations=recommendations)
 
 @app.route('/suggestions', methods=['GET'])
 def suggestions():
-    search_term = request.args.get('q', '')
-    results = data[data['movie_title'].str.contains(search_term, case=False, na=False)]['movie_title'].head(10).tolist()
+    search_term = request.args.get('q', '').lower()
+    results = [title for title in movie_titles if search_term in title][:10]
     return jsonify(results)
 
 if __name__ == '__main__':
