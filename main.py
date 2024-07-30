@@ -21,7 +21,7 @@ with open('top_k_cosine_similarities.pkl', 'rb') as sim_file:
 data = pd.read_csv('main_data.csv')
 movie_titles = data['movie_title'].str.lower().tolist()
 
-# Initialize IMDbPY
+# Initialize IMDbPY cache
 ia = IMDb()
 
 # Cache for cover URLs to avoid repeated lookups
