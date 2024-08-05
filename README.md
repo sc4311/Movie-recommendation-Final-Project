@@ -10,8 +10,6 @@ Welcome to the Movie Recommendation Final Project! This project involves creatin
 - [Setup Instructions](#setup-instructions)
 - [Usage](#usage)
 - [Dataset](#dataset)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Introduction
 
@@ -61,7 +59,9 @@ This project utilizes the MovieLens dataset to provide movie recommendations. Th
    ```bash
    kubectl apply -f k8s/deployment.yaml
    kubectl apply -f k8s/service.yaml
+   
   ## Usage
   Once the application is deployed, you can access it via the service's external IP. The web interface will allow you to get movie recommendations based on the MovieLens dataset.
+  
   ## Dataset
   The project uses the MovieLens dataset for providing movie recommendations. The dataset should be downloaded and placed in the appropriate directory specified in the application.
