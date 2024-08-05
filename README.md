@@ -30,7 +30,7 @@ This project utilizes the MovieLens dataset to provide movie recommendations. Th
 - Python
 - Flask (for the web service)
 - MovieLens dataset
-- Web Scraping for more recent movies on Wikipedia
+- Web Scraping (for more recent movies on Wikipedia)
 
 ## Setup Instructions
 
