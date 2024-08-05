@@ -30,6 +30,7 @@ This project utilizes the MovieLens dataset to provide movie recommendations. Th
 - Python
 - Flask (for the web service)
 - MovieLens dataset
+- Web Scraping
 
 ## Setup Instructions
 
